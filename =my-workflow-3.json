@@ -1,0 +1,208 @@
+{
+  "name": "My workflow 3",
+  "id": "uDRw8GIbQlNFaxCQ",
+  "active": false,
+  "createdAt": "2025-06-15T12:25:24.106Z",
+  "updatedAt": "2025-06-15T13:46:07.000Z",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 2
+            }
+          ]
+        }
+      },
+      "id": "72f18bf1-19a4-45b4-bcf0-73d71224b357",
+      "name": "Schedule Every 2 Hours",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://n8n.samx.online/api/v1/workflows",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "eb61a3fb-c0ec-437e-863e-ab5b8e67d936",
+      "name": "Get All Workflows",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        200,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "PzcJnMR9JQtKfFgD",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// معالج البيانات وتحضير الملفات للـ GitHub\nconst workflows = $json.data;\nconst results = [];\n\nfor (const workflow of workflows) {\n  // تنظيف اسم الملف\n  const fileName = workflow.name\n    .replace(/[^a-zA-Z0-9\\u0600-\\u06FF\\s-_]/g, '')\n    .replace(/\\s+/g, '-')\n    .toLowerCase();\n  \n  // تحضير محتوى الملف\n  const fileContent = {\n    name: workflow.name,\n    id: workflow.id,\n    active: workflow.active,\n    createdAt: workflow.createdAt,\n    updatedAt: workflow.updatedAt,\n    nodes: workflow.nodes,\n    connections: workflow.connections,\n    settings: workflow.settings,\n    staticData: workflow.staticData\n  };\n  \n  results.push({\n    fileName: `${fileName}.json`,\n    content: JSON.stringify(fileContent, null, 2),\n    workflow: workflow\n  });\n}\n\nreturn results;"
+      },
+      "id": "4e81596f-0ba9-4d62-8848-8f8c66dd0802",
+      "name": "Process Workflows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "value": "Zosar-ai",
+          "mode": "list"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n-workflows",
+          "mode": "list"
+        },
+        "filePath": "={{ $json.fileName }}",
+        "fileContent": "=",
+        "commitMessage": "🤖 Auto-sync: {{ $json.workflow.name }} - {{ new Date().toISOString().split('T')[0] }}"
+      },
+      "id": "6e837528-593a-4ee7-8276-e2bb65c4105d",
+      "name": "Sync to GitHub",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        820,
+        0
+      ],
+      "webhookId": "e1ef445b-630a-4020-920f-71e545ad95a4"
+    },
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "resource": "file",
+        "owner": "Zosar-ai",
+        "repository": "n8n-workflows",
+        "filePath": "README.md",
+        "fileContent": "# 🤖 N8N Workflows - Zosar AI\n\n## 📋 معلومات المشروع\n- **التحديث الأخير**: {{ new Date().toISOString() }}\n- **عدد الـ Workflows**: {{ $('Process Workflows').all().length }}\n- **النسخ الاحتياطي**: تلقائي كل ساعتين\n\n## 📁 الـ Workflows المتاحة\n{{ $('Process Workflows').all().map(item => `- **${item.json.workflow.name}** (${item.json.fileName})`).join('\\n') }}\n\n## 🔧 معلومات تقنية\n- **المصدر**: https://n8n.samx.online\n- **تاريخ آخر مزامنة**: {{ new Date().toLocaleString('ar-EG') }}\n\n---\n*تم إنشاء هذا الملف تلقائياً بواسطة n8n*",
+        "commitMessage": "📝 تحديث README - {{ new Date().toISOString().split('T')[0] }}"
+      },
+      "id": "b8cb98ea-0c2e-4ebc-b691-4baa5dbd8944",
+      "name": "Update README",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        1020,
+        0
+      ],
+      "webhookId": "c8a5b68c-86bb-4dc6-a1e1-2adba3c055e9"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "value": "Zosar-ai",
+          "mode": "list",
+          "cachedResultName": "Zosar-ai",
+          "cachedResultUrl": "https://github.com/Zosar-ai"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n-workflows",
+          "mode": "name"
+        },
+        "filePath": "=={{ $json.fileName }}",
+        "fileContent": "={{ $json.content }}",
+        "commitMessage": "=🤖 Auto-sync: {{ $json.workflow.name }} - {{ new Date().toISOString().split('T')[0] }}"
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        620,
+        0
+      ],
+      "id": "d636d7ee-0522-4ed3-8517-f74868c35d86",
+      "name": "GitHub",
+      "webhookId": "31183d84-df11-42bc-9bc3-e585a46073d0",
+      "credentials": {
+        "githubApi": {
+          "id": "sWCO96jmFomlWt0U",
+          "name": "GitHub account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Every 2 Hours": {
+      "main": [
+        [
+          {
+            "node": "Get All Workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Workflows": {
+      "main": [
+        [
+          {
+            "node": "Process Workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Workflows": {
+      "main": [
+        [
+          {
+            "node": "GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sync to GitHub": {
+      "main": [
+        [
+          {
+            "node": "Update README",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GitHub": {
+      "main": [
+        [
+          {
+            "node": "Sync to GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null
+}
