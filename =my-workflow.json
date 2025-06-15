@@ -1,0 +1,30 @@
+{
+  "name": "My workflow",
+  "id": "LE53l5WP93htkLfM",
+  "active": false,
+  "createdAt": "2025-05-19T19:39:56.292Z",
+  "updatedAt": "2025-05-19T19:39:56.292Z",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "tally-feedback",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "3bafaa72-6be6-4d68-90a3-2ee78ec92686",
+      "name": "Webhook",
+      "webhookId": "35b8435a-4ae5-476a-bbe5-e7f0129b7183"
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null
+}
